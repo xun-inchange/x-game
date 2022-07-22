@@ -1,0 +1,28 @@
+syntax = "proto3";
+
+package proto;
+
+option go_package = "./account_proto";
+
+//id:10001
+message AccountLoginReq {
+  uint64 account_id = 1;
+}
+
+//id:10002
+message AccountLoginResp {
+  //1 - 登录成功
+  //2 - 账户已经登录
+  uint64 result = 1;
+  uint64 account_id = 2;
+}
+
+//id 10003
+message AccountLogoutReq {
+
+}
+
+//id 10004
+message AccountLogoutResp {
+
+}

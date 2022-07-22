@@ -1,0 +1,93 @@
+syntax = "proto3";
+
+package proto;
+
+option go_package = "./chat_proto";
+
+
+//id:20001
+message ChatReq {
+  uint64 channel_id = 1;//频道id 1-公共频道 2-公会频道
+  ChatMsg chat_msg = 2;//聊天信息
+}
+
+message ChatMsg {
+  uint64 send_account_id = 1;
+  string content = 2;//内容
+  uint64 send_time = 3;//发送时间
+}
+
+//id:20002
+message ChatResp {
+  bool send_success = 1;//是否发送成功
+  uint64 channel_id = 2;
+}
+
+//id:20003
+//获取所有聊天房间详情 req
+message ChatRoomsDetailReq {
+
+}
+
+//id:20004
+//获取所有聊天房间详情 resp
+message ChatRoomsDetailResp {
+  repeated ChatRoomDetail rooms_detail = 1;
+}
+
+message ChatRoomDetail {
+  uint64 channel_id = 1;//频道id
+  uint64 user_number = 2;//房间人数
+}
+
+//id:20005
+//进入房间
+message ChatEnterRoomReq {
+  uint64 channel_id = 1;
+}
+
+//id:20006
+message ChatEnterRoomResp {
+  uint64 channel_id = 1;
+  uint64 result = 2;// 1-成功 2-频道不存在 3-已经加入房间
+}
+
+//id:20007
+//退出房间
+message ChatLeaveRoomReq {
+  uint64 channel_id = 1;//频道id
+}
+
+//id:20008
+message ChatLeaveRoomResp {
+  uint64 channel_id = 1;
+  uint64 result = 2;// 1-成功 2-频道不存在 4-未加入聊天室
+}
+
+//id:20009
+//获取房间数量
+message ChatRoomNumberReq {
+}
+
+//id:20010
+message ChatRoomNumberResp {
+  uint64 room_number = 1;//房间数量
+}
+
+//id:20011
+message ChatNewMsgNotify {
+  uint64 channel_id = 1;
+  ChatMsg chat_msg = 2;//聊天信息
+}
+
+//id:20012
+message ChatRoomChatRecordsReq {
+  uint64 channel_id = 1;
+}
+
+//id:20013
+message ChatRoomChatRecordsResp {
+  uint64 result = 1; //1-success 2-频道不存在
+  uint64 channel_id = 2;
+  repeated ChatMsg msg_records = 3;
+}
