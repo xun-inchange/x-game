@@ -16,6 +16,8 @@ import (
 	"x-game/proto/account_proto"
 	"x-game/proto/chat_proto"
 	"x-game/proto/proto_id"
+	"x-game/proto/server_proto"
+	"x-game/x-common/g"
 	"x-game/x-common/x_net"
 	network "x-game/x-common/x_net"
 	"x-game/x-common/x_utils"
@@ -55,11 +57,19 @@ func (m *clientInfo) Run() {
 	m.Conner.Start()
 }
 
+//func (m *clientInfo) sendHeart() {
+//	defer time.AfterFunc(g.HeartTime, m.sendClientSocketHeart)
+//	time.AfterFunc(g.HeartTime, m.sendClientSocketHeart)
+//}
+
 func (m *clientInfo) gmStart() {
+	heartTicker := time.NewTicker(g.HeartBeatTime)
 	for {
 		select {
 		case gmStr := <-m.Gm:
 			m.handleGmId(gmStr)
+		case <-heartTicker.C:
+			m.sendClientSocketHeart()
 		case <-m.Close:
 			break
 		}
@@ -197,6 +207,11 @@ func (m *clientInfo) getChatRecords(gmArr []string) {
 	}
 	req := &chat_proto.ChatRoomChatRecordsReq{ChannelId: strToUint64(gmArr[1])}
 	x_net.SendMsg(proto_id.ChatRoomChatRecordsReq, req, m.Conner)
+}
+
+func (m *clientInfo) sendClientSocketHeart() {
+	log.Printf("accountId[%v] send heart msg", m.AccountId)
+	x_net.SendMsg(proto_id.ClientSocketHeart, &server_proto.ClientHeartBeat{}, m.Conner)
 }
 
 func strToUint64(str string) uint64 {

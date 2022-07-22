@@ -191,9 +191,6 @@ func (m *chatRoom) broadMsg(msgID uint64, msg proto.Message) {
 }
 
 func (m *chatRoom) closeHandle() {
-	if _, isClose := <-m.close; isClose {
-		return
-	}
 	close(m.close)
 }
 

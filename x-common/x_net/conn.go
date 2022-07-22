@@ -5,6 +5,7 @@ import (
 	"log"
 	"net"
 	"reflect"
+	"time"
 	"x-game/x-common/g"
 	"x-game/x-common/message"
 	"x-game/x-common/x_utils"
@@ -20,11 +21,12 @@ type Conner interface {
 }
 
 type socketConn struct {
-	accountId uint64
-	conn      net.Conn
-	In        chan *message.Message
-	Out       chan []byte
-	close     chan struct{}
+	accountId     uint64
+	conn          net.Conn
+	In            chan *message.Message
+	Out           chan []byte
+	bySeverCreate bool //是否为服务器监听创建的socket,如果是将设置dead time
+	close         chan struct{}
 }
 
 func NewConner(c net.Conn) *socketConn {
@@ -53,9 +55,9 @@ func (m *socketConn) Start() {
 }
 
 func (m *socketConn) Stop() {
-	m.closeNotify()
 	m.waitMsgHandle()
 	m.conn.Close()
+	close(m.close)
 }
 
 func (m *socketConn) ReadMsg() {
@@ -63,8 +65,8 @@ func (m *socketConn) ReadMsg() {
 		buf := make([]byte, g.ReadWriteMaxLength)
 		n, err := m.conn.Read(buf)
 		if err != nil {
-			m.Stop()
 			log.Printf("read msg err,error is [%v]", err.Error())
+			m.Stop()
 			break
 		}
 		if n < g.ReadWriteMinLength {
@@ -73,6 +75,7 @@ func (m *socketConn) ReadMsg() {
 		}
 		msg := message.BytesToMsg(buf[:n])
 		m.In <- msg
+		m.setReadDeadLine()
 	}
 }
 
@@ -92,11 +95,11 @@ func (m *socketConn) WriteMsg() {
 	}
 }
 
-func (m *socketConn) closeNotify() {
-	if _, isClose := <-m.close; isClose {
+func (m *socketConn) setReadDeadLine() {
+	if !m.bySeverCreate {
 		return
 	}
-	close(m.close)
+	m.conn.SetReadDeadline(time.Now().Add(10 * time.Minute))
 }
 
 func (m *socketConn) SendMsg(msgId uint64, msg proto.Message) {
@@ -108,7 +111,10 @@ func (m *socketConn) msgHandle() {
 	defer x_utils.RecoverErr()
 	for {
 		select {
-		case msg := <-m.In:
+		case msg, ok := <-m.In:
+			if !ok {
+				continue
+			}
 			m.Handle(msg)
 		case <-m.close:
 			break

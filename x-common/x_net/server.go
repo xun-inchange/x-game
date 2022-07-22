@@ -7,6 +7,7 @@ import (
 )
 
 type Server struct {
+	sync.RWMutex
 	Addr          string
 	Listener      net.Listener
 	CSocketConn   map[uint64]Conner
@@ -38,15 +39,21 @@ func (m *Server) Run() {
 		}
 		log.Printf("new a addr[%v] conn", conn.RemoteAddr().String())
 		conner := NewConner(conn)
+		conner.bySeverCreate = true
+		conner.setReadDeadLine()
 		go conner.Start()
 	}
 }
 
 func (m *Server) StoreConner(accountId uint64, c Conner) {
+	m.Lock()
+	defer m.Unlock()
 	m.CSocketConn[accountId] = c
 }
 
 func (m *Server) GetConner(accountId uint64) Conner {
+	m.RLock()
+	defer m.RUnlock()
 	return m.CSocketConn[accountId]
 }
 
@@ -57,6 +64,7 @@ func (m *Server) Stop() {
 	}
 	m.ListenerClose = true
 	var wg sync.WaitGroup
+	m.RLock()
 	for _, c := range m.CSocketConn {
 		go func(c Conner) {
 			defer wg.Done()
@@ -64,5 +72,6 @@ func (m *Server) Stop() {
 			c.Stop()
 		}(c)
 	}
+	m.RUnlock()
 	wg.Wait()
 }

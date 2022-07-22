@@ -747,7 +747,7 @@ type ChatRoomChatRecordsResp struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Result     uint64     `protobuf:"varint,1,opt,name=result,proto3" json:"result,omitempty"`
+	Result     uint64     `protobuf:"varint,1,opt,name=result,proto3" json:"result,omitempty"` //1-success 2-频道不存在
 	ChannelId  uint64     `protobuf:"varint,2,opt,name=channel_id,json=channelId,proto3" json:"channel_id,omitempty"`
 	MsgRecords []*ChatMsg `protobuf:"bytes,3,rep,name=msg_records,json=msgRecords,proto3" json:"msg_records,omitempty"`
 }

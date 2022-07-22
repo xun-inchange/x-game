@@ -75,7 +75,7 @@ type AccountLoginResp struct {
 	unknownFields protoimpl.UnknownFields
 
 	//1 - 登录成功
-	//2 - 账户不存在
+	//2 - 账户已经登录
 	Result    uint64 `protobuf:"varint,1,opt,name=result,proto3" json:"result,omitempty"`
 	AccountId uint64 `protobuf:"varint,2,opt,name=account_id,json=accountId,proto3" json:"account_id,omitempty"`
 }

@@ -4,6 +4,7 @@ import (
 	"x-game/proto/account_proto"
 	"x-game/proto/chat_proto"
 	"x-game/proto/proto_id"
+	"x-game/proto/server_proto"
 	"x-game/x-common/x_net"
 )
 
@@ -15,4 +16,5 @@ func InitHandlers() {
 	x_net.RegisterHandler(proto_id.ChatEnterRoomReq, &chat_proto.ChatEnterRoomReq{}, ChatEnterRoomReqHandler)
 	x_net.RegisterHandler(proto_id.ChatLeaveRoomReq, &chat_proto.ChatLeaveRoomReq{}, ChatLeaveRoomReqHandler)
 	x_net.RegisterHandler(proto_id.ChatRoomChatRecordsReq, &chat_proto.ChatRoomChatRecordsReq{}, ChatRoomChatRecordsReqHandler)
+	x_net.RegisterHandler(proto_id.ClientSocketHeart, &server_proto.ClientHeartBeat{}, ClientHeartBeat)
 }

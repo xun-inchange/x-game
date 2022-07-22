@@ -1,0 +1,10 @@
+syntax = "proto3";
+
+package proto;
+
+option go_package = "./server_proto";
+
+//id:30001
+message ClientHeartBeat {
+
+}
