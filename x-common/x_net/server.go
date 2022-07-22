@@ -7,9 +7,10 @@ import (
 )
 
 type Server struct {
-	Addr        string
-	Listener    net.Listener
-	CSocketConn map[uint64]Conner
+	Addr          string
+	Listener      net.Listener
+	CSocketConn   map[uint64]Conner
+	ListenerClose bool
 }
 
 func NewServer(addr string) *Server {
@@ -28,8 +29,12 @@ func (m *Server) Run() {
 	for {
 		conn, err := m.Listener.Accept()
 		if err != nil {
-			log.Printf("accept socket err,error is [%v]", err.Error())
-			continue
+			if m.ListenerClose {
+				break
+			} else {
+				log.Printf("accept socket err,error is [%v]", err.Error())
+				continue
+			}
 		}
 		log.Printf("new a addr[%v] conn", conn.RemoteAddr().String())
 		conner := NewConner(conn)
@@ -50,11 +55,14 @@ func (m *Server) Stop() {
 	if err != nil {
 		log.Printf("server close listen socket err,error is [%v]", err.Error())
 	}
+	m.ListenerClose = true
 	var wg sync.WaitGroup
 	for _, c := range m.CSocketConn {
-		wg.Add(1)
-		go c.Stop()
-		wg.Done()
+		go func(c Conner) {
+			defer wg.Done()
+			wg.Add(1)
+			c.Stop()
+		}(c)
 	}
 	wg.Wait()
 }
